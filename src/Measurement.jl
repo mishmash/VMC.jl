@@ -6,8 +6,7 @@ type Estimate{T}
     sum::T
     n::Int
     avg::T
-    # Estimate() = new(T(0.), 0, T(0.))
-    Estimate() = new(convert(T, 0.), 0, convert(T, 0.))
+    Estimate() = new(T(0.), 0, T(0.))
 end
 
 function tally!{T}(est::Estimate{T}, value::T)
@@ -113,7 +112,7 @@ end
 function corr_func_matrix(data::Vector{Any})
     N = sqrt(length(data))
     @assert floor(N) == N
-    out = zeros(typeof(data[1][2]), (convert(Int, N), convert(Int, N)))
+    out = zeros(typeof(data[1][2]), (Int(N), Int(N)))
     for p in data
         out[p[1][1], p[1][2]] = p[2]
     end
@@ -190,7 +189,6 @@ function measure_SpSm{T}(wf::SBMWavefunction{T}, corr::MeasurementDataLattice{T}
         j = corr.site_labels[p][2]
         if i == j
             tally!(corr.estimates[p], (wf.config.lattice_status[1][i] != 0) ? T(1.) : T(0.))
-            # tally!(corr.estimates[p], (wf.config.lattice_status[1][i] != 0) ? convert(T, 1.) : convert(T, 0.))
         elseif wf.config.lattice_status[1][i] != 0 && wf.config.lattice_status[2][j] != 0
             m = wf.config.lattice_status[1][i] # = index of up particle at site i
             n = wf.config.lattice_status[2][j] # = index of down particle at site j
@@ -198,7 +196,7 @@ function measure_SpSm{T}(wf::SBMWavefunction{T}, corr::MeasurementDataLattice{T}
                 -1. * detrat_from_columns_update(wf.cmat_up, m, columns_for_detmat(wf.orbitals_up, j))
                     * detrat_from_columns_update(wf.cmat_down, n, columns_for_detmat(wf.orbitals_down, i)))
         else
-            tally!(corr.estimates[p], 0.)
+            tally!(corr.estimates[p], T(0.))
         end
     end
 end
@@ -233,14 +231,12 @@ function measure_Greens_function{T}(wf::FreeFermionWavefunction{T}, corr::Measur
         i = corr.site_labels[p][1]
         j = corr.site_labels[p][2]
         if i == j
-            # tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? T(1.) : T(0.))
-            tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? convert(T, 1.) : convert(T, 0.))
+            tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? T(1.) : T(0.))
         elseif is_occupied(wf.config, i, 1) && !is_occupied(wf.config, j, 1)
             m = wf.config.lattice_status[1][i]
             tally!(corr.estimates[p], detrat_from_columns_update(wf.cmat, m, columns_for_detmat(wf.orbitals, j)))
         else
-            # tally!(corr.estimates[p], T(0.))
-            tally!(corr.estimates[p], convert(T, 0.))
+            tally!(corr.estimates[p], T(0.))
         end
     end
 end
@@ -250,8 +246,7 @@ function measure_Greens_function{T}(wf::CFLWavefunction{T}, corr::MeasurementDat
         i = corr.site_labels[p][]
         j = corr.site_labels[p][2]
         if i == j
-            # tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? T(1.) : T(0.))
-            tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? convert(T, 1.) : convert(T, 0.))
+            tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? T(1.) : T(0.))
         elseif is_occupied(wf.config, i, 1) && !is_occupied(wf.config, j, 1)
             m = wf.config.lattice_status[1][i]
             tally!(corr.estimates[p],
@@ -259,8 +254,7 @@ function measure_Greens_function{T}(wf::CFLWavefunction{T}, corr::MeasurementDat
               * detrat_from_columns_update(wf.cmat_d2, m, columns_for_detmat(wf.orbitals_d2, j))
               * detrat_from_columns_update(wf.cmat_f, m, columns_for_detmat(wf.orbitals_f, j)))
         else
-            # tally!(corr.estimates[p], T(0.))
-            tally!(corr.estimates[p], convert(T, 0.))
+            tally!(corr.estimates[p], T(0.))
         end
     end
 end
@@ -270,16 +264,14 @@ function measure_Greens_function{Td,Tf}(wf::BosonCFLWavefunction{Td,Tf}, corr::M
         i = corr.site_labels[p][]
         j = corr.site_labels[p][2]
         if i == j
-            # tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? Td(1.) : Td(0.))
-            tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? convert(Td, 1.) : convert(Td, 0.))
+            tally!(corr.estimates[p], is_occupied(wf.config, i, 1) ? Td(1.) : Td(0.))
         elseif is_occupied(wf.config, i, 1) && !is_occupied(wf.config, j, 1)
             m = wf.config.lattice_status[1][i]
             tally!(corr.estimates[p],
                 detrat_from_columns_update(wf.cmat_d, m, columns_for_detmat(wf.orbitals_d, j))
               * detrat_from_columns_update(wf.cmat_f, m, columns_for_detmat(wf.orbitals_f, j)))
         else
-            # tally!(corr.estimates[p], Td(0.))
-            tally!(corr.estimates[p], convert(Td, 0.))
+            tally!(corr.estimates[p], Td(0.))
         end
     end
 end
